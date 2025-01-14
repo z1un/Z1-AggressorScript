@@ -1,0 +1,47 @@
+menu "RDP related" {
+item "Get RDP port" {
+local('$bid');
+foreach $bid ($1){
+blog($1, "Check Rdp Open Port");
+bpowershell_import($bid, script_resource("/scripts/RDP/RegRdpPort.ps1"));
+bpowerpick($bid,"RegRdpPort");
+bshell($bid,"wevtutil cl \"Windows PowerShell\"");
+}
+}
+item "Check whether RDP is enabled" {
+blog($1, "Please execute manually: shell netstat -ano | findstr \$RDP port")
+}
+
+item "Enable RDP service" {
+$bid = $1['@'];
+bshell($bid, "REG ADD HKLM\\SYSTEM\\CurrentControlSet\\Control\\Terminal\" \"Server /v fDenyTSConnections /t REG_DWORD /d 0 /f");
+bshell($bid, "wmic RDTOGGLE WHERE ServerName='%COMPUTERNAME%' call SetAllowTSConnections 1");
+}
+
+item "Close RDP service" {
+$bid = $1['@'];
+bshell($bid, "REG ADD HKLM\\SYSTEM\\CurrentControlSet\\Control\\Terminal\" \"Server /v fDenyTSConnections /t REG_DWORD /d 1 /f");
+bshell($bid, "wmic RDTOGGLE WHERE ServerName='%COMPUTERNAME%' call SetAllowTSConnections 0");
+}
+
+item "Force online users to log off" {
+$bid = $1['@'];
+bshell($bid,"query user");
+$Dialog = dialog("Force online users to log off",%(ID => "",bid => $bid),&logoff);
+dialog_description($Dialog, "Pay attention to the console output and fill in the ID number.");
+drow_text($Dialog, "ID", "id: ");
+dbutton_action($Dialog, "Run");
+dialog_show($Dialog);
+}
+sub logoff{
+local('$ID');
+$ID = $3['id'];
+bshell($bid, "logoff $ID");
+}
+
+item "Firewall RDP Release Rule" {
+$bid = $1['@'];
+bshell($bid, "netsh advfirewall firewall add rule name=\"Remote Desktop\" protocol=TCP dir=in localport=3389 action=allow");
+}
+
+}

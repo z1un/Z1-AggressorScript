@@ -1,0 +1,4 @@
+menu "About" {
+  item("zjun", { url_open("https://www.zjun.info"); });
+  item("Project gallery", { url_open("https://github.com/z1un/Z1-AggressorScripts"); });
+}
